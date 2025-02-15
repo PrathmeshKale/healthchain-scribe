@@ -4,27 +4,81 @@ import Navigation from "../components/Navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, UserPlus, Shield } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import Web3 from "web3";
 
 const PatientsPage = () => {
   const [newPatientAddress, setNewPatientAddress] = useState("");
   const [newPatientInfo, setNewPatientInfo] = useState("");
   const [patients, setPatients] = useState<Array<{ id: string; info: string }>>([]);
+  const [web3, setWeb3] = useState<Web3 | null>(null);
+  const [account, setAccount] = useState<string>("");
   const { toast } = useToast();
 
+  useEffect(() => {
+    const initWeb3 = async () => {
+      // Modern browsers with MetaMask
+      if (window.ethereum) {
+        try {
+          const web3Instance = new Web3(window.ethereum);
+          // Request account access
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          setWeb3(web3Instance);
+          
+          // Get connected account
+          const accounts = await web3Instance.eth.getAccounts();
+          setAccount(accounts[0]);
+
+          // Load initial patient data
+          fetchPatients();
+        } catch (error) {
+          console.error("User denied account access");
+          toast({
+            title: "Connection Error",
+            description: "Please connect your wallet to manage patients.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Web3 Not Found",
+          description: "Please install MetaMask to use this application.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    initWeb3();
+  }, []);
+
   const addPatient = async () => {
+    if (!web3 || !account) {
+      toast({
+        title: "Connection Error",
+        description: "Please connect your wallet first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      // Here you would call the smart contract's add patient function
+      // Here you would instantiate your contract and call addPatient
+      // const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+      // await contract.methods.addPatient(newPatientAddress, newPatientInfo).send({ from: account });
+      
       toast({
         title: "Patient Added",
         description: "The new patient has been successfully registered.",
       });
       
-      // Refresh patients list
+      // Clear form and refresh list
+      setNewPatientAddress("");
+      setNewPatientInfo("");
       fetchPatients();
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to add patient. Please ensure you have the required permissions.",
@@ -34,8 +88,13 @@ const PatientsPage = () => {
   };
 
   const fetchPatients = async () => {
+    if (!web3) return;
+
     try {
-      // Here you would call the smart contract's get all patients function
+      // Here you would instantiate your contract and get patients
+      // const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+      // const patientList = await contract.methods.getAllPatients().call();
+      
       // For now using mock data
       const mockPatients = [
         { id: "0x123...abc", info: "IPFS_HASH_1" },
@@ -43,6 +102,7 @@ const PatientsPage = () => {
       ];
       setPatients(mockPatients);
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to fetch patients list.",
@@ -72,6 +132,9 @@ const PatientsPage = () => {
                 <span className="text-sm text-gray-600">Doctor Access Required</span>
               </div>
             </div>
+            {account && (
+              <p className="text-sm text-gray-600 mt-2">Connected: {account}</p>
+            )}
           </motion.div>
 
           {/* Add Patient Form */}
@@ -104,6 +167,7 @@ const PatientsPage = () => {
               <Button 
                 className="mt-4"
                 onClick={addPatient}
+                disabled={!web3 || !account}
               >
                 Add Patient
               </Button>
