@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import Navigation from "../components/Navigation";
 import { Card } from "@/components/ui/card";
-import { ChartLineUp, Users, Calendar } from "lucide-react";
+import { ChartLine, Users, Calendar } from "lucide-react";
 
 const Dashboard = () => {
   return (
@@ -36,7 +36,7 @@ const Dashboard = () => {
             <StatsCard
               title="Active Records"
               value="856"
-              icon={<ChartLineUp className="w-6 h-6 text-primary" />}
+              icon={<ChartLine className="w-6 h-6 text-primary" />}
             />
             <StatsCard
               title="Appointments"
@@ -126,7 +126,7 @@ const actions = [
   },
   {
     label: "View Reports",
-    icon: <ChartLineUp className="w-5 h-5 text-gray-600" />,
+    icon: <ChartLine className="w-5 h-5 text-gray-600" />,
   },
 ];
 
