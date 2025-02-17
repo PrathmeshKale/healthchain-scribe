@@ -4,28 +4,81 @@ import Navigation from "../components/Navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, UserPlus, Shield } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import Web3 from "web3";
 
 const DoctorsPage = () => {
   const [newDoctorAddress, setNewDoctorAddress] = useState("");
   const [newDoctorInfo, setNewDoctorInfo] = useState("");
   const [doctors, setDoctors] = useState<Array<{ id: string; info: string }>>([]);
+  const [web3, setWeb3] = useState<Web3 | null>(null);
+  const [account, setAccount] = useState<string>("");
   const { toast } = useToast();
 
-  // Mock functions - to be replaced with actual Web3 contract calls
+  useEffect(() => {
+    const initWeb3 = async () => {
+      // Modern browsers with MetaMask
+      if (window.ethereum) {
+        try {
+          const web3Instance = new Web3(window.ethereum);
+          // Request account access
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          setWeb3(web3Instance);
+          
+          // Get connected account
+          const accounts = await web3Instance.eth.getAccounts();
+          setAccount(accounts[0]);
+
+          // Load initial doctor data
+          fetchDoctors();
+        } catch (error) {
+          console.error("User denied account access");
+          toast({
+            title: "Connection Error",
+            description: "Please connect your wallet to manage doctors.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Web3 Not Found",
+          description: "Please install MetaMask to use this application.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    initWeb3();
+  }, []);
+
   const addDoctor = async () => {
+    if (!web3 || !account) {
+      toast({
+        title: "Connection Error",
+        description: "Please connect your wallet first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      // Here you would call the smart contract's addDrInfo function
+      // Here you would instantiate your contract and call addDrInfo
+      // const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+      // await contract.methods.addDrInfo(newDoctorAddress, newDoctorInfo).send({ from: account });
+      
       toast({
         title: "Doctor Added",
         description: "The new doctor has been successfully registered.",
       });
       
-      // Refresh doctors list
+      // Clear form and refresh list
+      setNewDoctorAddress("");
+      setNewDoctorInfo("");
       fetchDoctors();
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to add doctor. Please ensure you have admin rights.",
@@ -35,8 +88,13 @@ const DoctorsPage = () => {
   };
 
   const fetchDoctors = async () => {
+    if (!web3) return;
+
     try {
-      // Here you would call the smart contract's getAllDrs function
+      // Here you would instantiate your contract and get doctors
+      // const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+      // const doctorsList = await contract.methods.getAllDrs().call();
+      
       // For now using mock data
       const mockDoctors = [
         { id: "0x123...abc", info: "IPFS_HASH_1" },
@@ -44,6 +102,7 @@ const DoctorsPage = () => {
       ];
       setDoctors(mockDoctors);
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to fetch doctors list.",
@@ -73,6 +132,9 @@ const DoctorsPage = () => {
                 <span className="text-sm text-gray-600">Admin Access Required</span>
               </div>
             </div>
+            {account && (
+              <p className="text-sm text-gray-600 mt-2">Connected: {account}</p>
+            )}
           </motion.div>
 
           {/* Add Doctor Form */}
@@ -105,6 +167,7 @@ const DoctorsPage = () => {
               <Button 
                 className="mt-4"
                 onClick={addDoctor}
+                disabled={!web3 || !account}
               >
                 Add Doctor
               </Button>
