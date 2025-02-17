@@ -14,9 +14,9 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <TooltipProvider>
+    <TooltipProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
           <div className="min-h-screen bg-background font-sans">
             <Routes>
               <Route path="/" element={<Index />} />
@@ -28,9 +28,9 @@ const App = () => {
             <Toaster />
             <Sonner />
           </div>
-        </TooltipProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </TooltipProvider>
   );
 };
 
