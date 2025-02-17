@@ -1,50 +1,14 @@
 
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
-import Web3 from "web3";
-
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [account, setAccount] = useState<string>("");
-  const [web3, setWeb3] = useState<Web3 | null>(null);
-
-  useEffect(() => {
-    const initWeb3 = async () => {
-      if (window.ethereum) {
-        try {
-          const web3Instance = new Web3(window.ethereum);
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          setWeb3(web3Instance);
-          
-          const accounts = await web3Instance.eth.getAccounts();
-          setAccount(accounts[0]);
-
-          // Listen for account changes
-          window.ethereum.on('accountsChanged', function (accounts: string[]) {
-            setAccount(accounts[0]);
-          });
-        } catch (error) {
-          console.error("User denied account access");
-        }
-      }
-    };
-
-    initWeb3();
-
-    // Cleanup listener on unmount
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', () => {});
-      }
-    };
-  }, []);
+  const { account, isAuthenticated, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -62,11 +26,30 @@ const Navigation = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          <NavLinks />
-          {account && (
-            <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm">
-              {formatAddress(account)}
-            </span>
+          {isAuthenticated && isAdmin && <NavLinks />}
+          {account ? (
+            <div className="flex items-center gap-4">
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm">
+                {formatAddress(account)}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={logout}
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/login')}
+            >
+              Connect Wallet
+            </Button>
           )}
         </div>
 
@@ -82,11 +65,35 @@ const Navigation = () => {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="absolute top-full left-0 right-0 glass md:hidden py-4 px-6 slide-in">
-            <NavLinks mobile onClick={toggleMenu} />
-            {account && (
-              <div className="mt-4 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm text-center">
-                {formatAddress(account)}
+            {isAuthenticated && isAdmin && <NavLinks mobile onClick={toggleMenu} />}
+            {account ? (
+              <div className="mt-4 space-y-4">
+                <div className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm text-center">
+                  {formatAddress(account)}
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2"
+                  onClick={() => {
+                    logout();
+                    toggleMenu();
+                  }}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
               </div>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => {
+                  navigate('/login');
+                  toggleMenu();
+                }}
+              >
+                Connect Wallet
+              </Button>
             )}
           </div>
         )}
