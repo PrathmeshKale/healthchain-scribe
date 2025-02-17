@@ -4,6 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import Web3 from 'web3';
 import { useToast } from "@/components/ui/use-toast";
 
+// Add ethereum window type definition
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 interface AuthContextType {
   isAdmin: boolean;
   isAuthenticated: boolean;
