@@ -1,133 +1,109 @@
 
-import { motion } from "framer-motion";
-import Navigation from "../components/Navigation";
-import { Card } from "@/components/ui/card";
-import { ChartLine, Users, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useWeb3 } from "@/components/Web3Provider";
+import { useToast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
+  const [doctorDetails, setDoctorDetails] = useState<DoctorDetails>({
+    docID: "",
+    fName: "First Name",
+    lName: "Last Name",
+    Doj: "",
+    emailID: "test_name@mail.com",
+    phone: "123456789",
+    city: "city",
+    state: "state",
+    speciality: "speciality",
+    imageHash: null,
+  });
+
+  const { contract, account } = useWeb3();
+  const { toast } = useToast();
+
+  const getDoctorDetails = async () => {
+    try {
+      if (!contract || !account) return;
       
-      <main className="pt-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-2">Welcome back to your health records dashboard</p>
-          </motion.div>
+      const drInfo = await contract.methods.getDr(account).call();
+      if (drInfo) {
+        const details = JSON.parse(drInfo);
+        setDoctorDetails(details);
+      }
+    } catch (error) {
+      console.error("Error fetching doctor details:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch doctor details",
+        variant: "destructive",
+      });
+    }
+  };
 
-          {/* Stats Cards */}
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <StatsCard
-              title="Total Patients"
-              value="1,234"
-              icon={<Users className="w-6 h-6 text-primary" />}
-            />
-            <StatsCard
-              title="Active Records"
-              value="856"
-              icon={<ChartLine className="w-6 h-6 text-primary" />}
-            />
-            <StatsCard
-              title="Appointments"
-              value="89"
-              icon={<Calendar className="w-6 h-6 text-primary" />}
-            />
-          </motion.div>
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      getDoctorDetails();
+    }, 3000);
 
-          {/* Main Content Area */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recent Activity */}
-            <Card className="col-span-2 p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-              <div className="space-y-4">
-                {activities.map((activity, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-start space-x-4 p-4 rounded-lg bg-white shadow-sm"
-                  >
-                    <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
-                    <div>
-                      <p className="font-medium">{activity.title}</p>
-                      <p className="text-sm text-gray-600">{activity.time}</p>
-                    </div>
-                  </motion.div>
-                ))}
+    return () => clearTimeout(timer);
+  }, [contract, account]);
+
+  return (
+    <div className="container mx-auto p-6">
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Doctor Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start space-x-6">
+            <Avatar className="h-24 w-24">
+              {doctorDetails.imageHash ? (
+                <AvatarImage src={`https://ipfs.io/ipfs/${doctorDetails.imageHash}`} />
+              ) : (
+                <AvatarFallback>
+                  {doctorDetails.fName[0]}{doctorDetails.lName[0]}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            
+            <div className="space-y-4 flex-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-sm text-gray-500">Name</h3>
+                  <p className="text-lg">{`${doctorDetails.fName} ${doctorDetails.lName}`}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-gray-500">ID</h3>
+                  <p className="text-lg">{doctorDetails.docID || "Not assigned"}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-gray-500">Email</h3>
+                  <p className="text-lg">{doctorDetails.emailID}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-gray-500">Phone</h3>
+                  <p className="text-lg">{doctorDetails.phone}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-gray-500">Location</h3>
+                  <p className="text-lg">{`${doctorDetails.city}, ${doctorDetails.state}`}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-gray-500">Speciality</h3>
+                  <p className="text-lg">{doctorDetails.speciality}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-gray-500">Date of Joining</h3>
+                  <p className="text-lg">{doctorDetails.Doj || "Not available"}</p>
+                </div>
               </div>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                {actions.map((action, index) => (
-                  <motion.button
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="w-full p-3 text-left rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-3"
-                  >
-                    {action.icon}
-                    <span>{action.label}</span>
-                  </motion.button>
-                ))}
-              </div>
-            </Card>
+            </div>
           </div>
-        </div>
-      </main>
+        </CardContent>
+      </Card>
     </div>
   );
 };
-
-const StatsCard = ({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) => (
-  <Card className="p-6">
-    <div className="flex items-start justify-between">
-      <div>
-        <p className="text-gray-600 text-sm">{title}</p>
-        <p className="text-2xl font-semibold mt-1">{value}</p>
-      </div>
-      <div className="p-3 bg-primary/10 rounded-lg">
-        {icon}
-      </div>
-    </div>
-  </Card>
-);
-
-const activities = [
-  { title: "New patient record added", time: "5 minutes ago" },
-  { title: "Medical report updated", time: "1 hour ago" },
-  { title: "Appointment scheduled", time: "2 hours ago" },
-  { title: "Lab results uploaded", time: "3 hours ago" },
-];
-
-const actions = [
-  {
-    label: "Add New Patient",
-    icon: <Users className="w-5 h-5 text-gray-600" />,
-  },
-  {
-    label: "Schedule Appointment",
-    icon: <Calendar className="w-5 h-5 text-gray-600" />,
-  },
-  {
-    label: "View Reports",
-    icon: <ChartLine className="w-5 h-5 text-gray-600" />,
-  },
-];
 
 export default Dashboard;

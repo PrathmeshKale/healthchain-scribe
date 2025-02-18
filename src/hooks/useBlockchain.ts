@@ -1,15 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import Web3 from 'web3';
-// Import Contract ABI from the correct location after truffle compile
 import Contract from '../abis/Contract.json';
-
-declare global {
-  interface Window {
-    ethereum: any;
-    web3: any;
-  }
-}
 
 interface BlockchainState {
   account: string;
@@ -66,13 +58,12 @@ export const useBlockchain = () => {
           error: null
         });
 
-        // Setup account change listener
         window.ethereum.on('accountsChanged', async (accounts: string[]) => {
           const newAccount = accounts[0];
           const newBalanceWei = await web3.eth.getBalance(newAccount);
           const newBalance = Math.floor(Number(web3.utils.fromWei(newBalanceWei.toString(), "ether")) * 1000) / 1000;
           const newIsAdmin = await contract.methods.isAdmin().call({ from: newAccount });
-          const newIsAdminBool = Boolean(newIsAdmin); // Convert to boolean
+          const newIsAdminBool = Boolean(newIsAdmin);
 
           setState(prevState => ({
             ...prevState,
@@ -109,7 +100,7 @@ export const useBlockchain = () => {
     if (!state.contract || !state.account) return false;
     try {
       const isAdmin = await state.contract.methods.isAdmin().call({ from: state.account });
-      return Boolean(isAdmin); // Convert to boolean
+      return Boolean(isAdmin);
     } catch (error) {
       console.error('Check admin error:', error);
       return false;
