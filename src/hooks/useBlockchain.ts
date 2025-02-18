@@ -1,7 +1,15 @@
 
 import { useState, useEffect } from 'react';
 import Web3 from 'web3';
+// Import Contract ABI from the correct location after truffle compile
 import Contract from '../abis/Contract.json';
+
+declare global {
+  interface Window {
+    ethereum: any;
+    web3: any;
+  }
+}
 
 interface BlockchainState {
   account: string;
@@ -32,10 +40,10 @@ export const useBlockchain = () => {
         const account = accounts[0];
         
         const balanceWei = await web3.eth.getBalance(account);
-        const balance = Math.floor(Number(web3.utils.fromWei(balanceWei, "ether")) * 1000) / 1000;
+        const balance = Math.floor(Number(web3.utils.fromWei(balanceWei.toString(), "ether")) * 1000) / 1000;
 
         const netId = await web3.eth.net.getId();
-        const networkData = (Contract as any).networks[netId];
+        const networkData = (Contract as any).networks[netId.toString()];
 
         if (!networkData) {
           throw new Error('Contract not deployed to detected network');
@@ -47,13 +55,14 @@ export const useBlockchain = () => {
         );
 
         const isAdmin = await contract.methods.isAdmin().call({ from: account });
+        const isAdminBool = Boolean(isAdmin); // Convert to boolean
 
         setState({
           account,
           balance,
           web3,
           contract,
-          isAdmin,
+          isAdmin: isAdminBool,
           error: null
         });
 
@@ -61,14 +70,15 @@ export const useBlockchain = () => {
         window.ethereum.on('accountsChanged', async (accounts: string[]) => {
           const newAccount = accounts[0];
           const newBalanceWei = await web3.eth.getBalance(newAccount);
-          const newBalance = Math.floor(Number(web3.utils.fromWei(newBalanceWei, "ether")) * 1000) / 1000;
+          const newBalance = Math.floor(Number(web3.utils.fromWei(newBalanceWei.toString(), "ether")) * 1000) / 1000;
           const newIsAdmin = await contract.methods.isAdmin().call({ from: newAccount });
+          const newIsAdminBool = Boolean(newIsAdmin); // Convert to boolean
 
           setState(prevState => ({
             ...prevState,
             account: newAccount,
             balance: newBalance,
-            isAdmin: newIsAdmin
+            isAdmin: newIsAdminBool
           }));
         });
 
@@ -99,7 +109,7 @@ export const useBlockchain = () => {
     if (!state.contract || !state.account) return false;
     try {
       const isAdmin = await state.contract.methods.isAdmin().call({ from: state.account });
-      return isAdmin;
+      return Boolean(isAdmin); // Convert to boolean
     } catch (error) {
       console.error('Check admin error:', error);
       return false;
