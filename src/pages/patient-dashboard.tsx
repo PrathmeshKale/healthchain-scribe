@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWeb3 } from "@/components/Web3Provider";
-import Navigation from "@/components/Navigation";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { FileText, Calendar, UserCog, MessageSquare } from "lucide-react";
 
 const PatientDashboard = () => {
@@ -55,33 +55,30 @@ const PatientDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <main className="container mx-auto px-4 py-24">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Patient Dashboard</h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature) => (
-              <Card key={feature.title} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <feature.icon className="w-5 h-5 text-primary" />
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="mb-4">{feature.description}</CardDescription>
-                  <Button onClick={feature.action} className="w-full">
-                    Access
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">Welcome Back</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature) => (
+            <Card key={feature.title} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <feature.icon className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="mb-4">{feature.description}</CardDescription>
+                <Button onClick={feature.action} className="w-full">
+                  Access
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
