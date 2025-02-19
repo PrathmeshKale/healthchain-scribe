@@ -5,19 +5,27 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useWeb3 } from "@/components/Web3Provider";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Web3 from "web3";
 import Contract from '../abis/Contract.json';
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { web3 } = useWeb3();
 
+  // Add useEffect to handle automatic redirection
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
+
   const handleLogin = async () => {
     try {
       await login();
-      navigate('/dashboard');
+      // Navigation will be handled by useEffect
     } catch (error) {
       toast({
         title: "Login Error",
@@ -42,12 +50,12 @@ const LoginPage = () => {
 
       // Deploy new contract
       const contract = new web3Instance.eth.Contract((Contract as any).abi);
-      const gas = await contract.deploy({ data: (Contract as any).bytecode }).estimateGas();
+      const gasEstimate = await contract.deploy({ data: (Contract as any).bytecode }).estimateGas();
       
       const newContract = await contract.deploy({ data: (Contract as any).bytecode })
         .send({
           from: account,
-          gas: gas
+          gas: String(gasEstimate) // Convert bigint to string to fix type error
         });
 
       toast({

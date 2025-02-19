@@ -3,7 +3,9 @@ interface Window {
   ethereum?: {
     request: (args: { method: string }) => Promise<string[]>;
     on: (event: string, callback: (accounts: string[]) => void) => void;
+    removeListener: (event: string, callback: (accounts: string[]) => void) => void;
     enable: () => Promise<void>;
+    isMetaMask?: boolean;
   };
   web3?: any;
 }
