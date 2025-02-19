@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Web3 from "web3";
 import Contract from '../abis/Contract.json';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const LoginPage = () => {
   const { login, isAuthenticated, isAdmin } = useAuth();
@@ -17,8 +18,12 @@ const LoginPage = () => {
 
   // Add useEffect to handle automatic redirection
   useEffect(() => {
-    if (isAuthenticated && isAdmin) {
-      navigate('/dashboard');
+    if (isAuthenticated) {
+      if (isAdmin) {
+        navigate('/dashboard');
+      } else {
+        navigate('/patient-dashboard');
+      }
     }
   }, [isAuthenticated, isAdmin, navigate]);
 
@@ -79,36 +84,52 @@ const LoginPage = () => {
     <div className="container flex items-center justify-center min-h-screen">
       <Card className="w-[400px]">
         <CardHeader>
-          <CardTitle>Welcome Back</CardTitle>
+          <CardTitle>Welcome to HealthChain</CardTitle>
           <CardDescription>
-            Connect your wallet to access the dashboard
+            Connect your wallet to access the platform
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={handleLogin} className="w-full">
-            Connect Wallet
-          </Button>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or
-              </span>
-            </div>
-          </div>
-          <Button 
-            onClick={handleResetAdmin} 
-            variant="outline" 
-            className="w-full"
-          >
-            Reset Admin (Deploy New Contract)
-          </Button>
-          <p className="text-xs text-muted-foreground text-center">
-            Warning: Resetting admin will deploy a new contract and set you as the admin.
-            Make sure you're on the correct network.
-          </p>
+        <CardContent>
+          <Tabs defaultValue="patient" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="patient">Patient</TabsTrigger>
+              <TabsTrigger value="admin">Admin/Doctor</TabsTrigger>
+            </TabsList>
+            <TabsContent value="patient" className="space-y-4">
+              <Button onClick={handleLogin} className="w-full">
+                Connect Patient Wallet
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Connect your wallet to access your medical records and appointments
+              </p>
+            </TabsContent>
+            <TabsContent value="admin" className="space-y-4">
+              <Button onClick={handleLogin} className="w-full">
+                Connect Admin/Doctor Wallet
+              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or
+                  </span>
+                </div>
+              </div>
+              <Button 
+                onClick={handleResetAdmin} 
+                variant="outline" 
+                className="w-full"
+              >
+                Reset Admin (Deploy New Contract)
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Warning: Resetting admin will deploy a new contract and set you as the admin.
+                Make sure you're on the correct network.
+              </p>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

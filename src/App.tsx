@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import DoctorsPage from "./pages/doctors";
 import PatientsPage from "./pages/patients";
+import PatientDashboard from "./pages/patient-dashboard";
 import LoginPage from "./pages/login";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <PatientsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient-dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <PatientDashboard />
                     </ProtectedRoute>
                   }
                 />
