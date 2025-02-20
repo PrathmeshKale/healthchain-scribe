@@ -6,6 +6,7 @@ import { Mockup, MockupFrame } from "@/components/ui/mockup";
 import { Glow } from "@/components/ui/glow";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { FlickeringGrid } from "./flickering-grid";
 
 interface HeroAction {
   text: string;
@@ -41,12 +42,20 @@ export function HeroSection({
   return (
     <section
       className={cn(
-        "bg-background text-foreground",
+        "relative bg-background text-foreground",
         "py-12 sm:py-24 md:py-32 px-4",
         "fade-bottom overflow-hidden pb-0"
       )}
     >
-      <div className="mx-auto flex max-w-container flex-col gap-12 pt-16 sm:gap-24">
+      <FlickeringGrid
+        className="absolute inset-0 z-0"
+        squareSize={4}
+        gridGap={6}
+        color="#6B7280"
+        maxOpacity={0.3}
+        flickerChance={0.1}
+      />
+      <div className="relative mx-auto flex max-w-container flex-col gap-12 pt-16 sm:gap-24">
         <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
           {/* Badge */}
           {badge && (
