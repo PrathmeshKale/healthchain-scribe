@@ -2,6 +2,7 @@
 import { HeroSection } from "@/components/ui/hero-section";
 import { Icons } from "@/components/ui/icons";
 import Navigation from "../components/Navigation";
+import { Typewriter } from "@/components/ui/typewriter";
 
 const Index = () => {
   return (
@@ -16,7 +17,25 @@ const Index = () => {
             href: "/about",
           },
         }}
-        title="Secure Health Records on the Blockchain"
+        title={
+          <div className="flex flex-col items-center">
+            <span>Secure</span>
+            <Typewriter
+              text={[
+                "Health Records",
+                "Patient Data",
+                "Medical History",
+                "Clinical Notes",
+              ]}
+              speed={70}
+              className="text-primary"
+              waitTime={2000}
+              deleteSpeed={40}
+              cursorChar="_"
+            />
+            <span>on the Blockchain</span>
+          </div>
+        }
         description="Take control of your medical data with our decentralized platform. Secure, accessible, and always under your control."
         actions={[
           {
