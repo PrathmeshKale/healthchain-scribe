@@ -54,8 +54,18 @@ const App = () => (
                 <Route
                   path="/patient-dashboard"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute userType="patient">
                       <PatientDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/doctor-dashboard"
+                  element={
+                    <ProtectedRoute userType="doctor">
+                      <DashboardLayout>
+                        <DoctorDashboard />
+                      </DashboardLayout>
                     </ProtectedRoute>
                   }
                 />

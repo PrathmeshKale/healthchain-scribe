@@ -4,10 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import Web3 from 'web3';
 import { useToast } from "@/components/ui/use-toast";
 
+type UserType = 'patient' | 'doctor' | null;
+
 interface AuthContextType {
   isAdmin: boolean;
   isAuthenticated: boolean;
   account: string | null;
+  userType: UserType;
   login: () => Promise<void>;
   logout: () => void;
   web3: Web3 | null;
@@ -20,16 +23,29 @@ const ADMIN_ADDRESSES = [
   '0x123...', // Replace with actual admin addresses
 ].map(addr => addr.toLowerCase());
 
+// Mock doctor addresses for demo purposes
+const DOCTOR_ADDRESSES = [
+  '0x456...', // Replace with actual doctor addresses
+].map(addr => addr.toLowerCase());
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [account, setAccount] = useState<string | null>(null);
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState<UserType>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const checkAdminStatus = (address: string) => {
     return ADMIN_ADDRESSES.includes(address.toLowerCase());
+  };
+
+  const checkUserType = (address: string): UserType => {
+    if (DOCTOR_ADDRESSES.includes(address.toLowerCase())) {
+      return 'doctor';
+    }
+    return 'patient';
   };
 
   const login = async () => {
@@ -56,20 +72,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const adminStatus = checkAdminStatus(currentAccount);
       setIsAdmin(adminStatus);
 
-      if (!adminStatus) {
-        toast({
-          title: "Access Denied",
-          description: "This address is not authorized as an admin.",
-          variant: "destructive",
-        });
-        return;
-      }
+      const userRole = checkUserType(currentAccount);
+      setUserType(userRole);
 
       toast({
         title: "Connected",
-        description: "Successfully authenticated as admin.",
+        description: `Successfully authenticated as ${userRole}.`,
       });
-      navigate('/dashboard');
+
+      // Redirect based on user type
+      if (userRole === 'doctor') {
+        navigate('/doctor-dashboard');
+      } else {
+        navigate('/patient-dashboard');
+      }
     } catch (error) {
       console.error('Login error:', error);
       toast({
@@ -84,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAccount(null);
     setIsAdmin(false);
     setIsAuthenticated(false);
+    setUserType(null);
     setWeb3(null);
     navigate('/');
     toast({
@@ -101,9 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccount(newAccount);
         const adminStatus = checkAdminStatus(newAccount);
         setIsAdmin(adminStatus);
-        if (!adminStatus) {
-          logout();
-        }
+        const userRole = checkUserType(newAccount);
+        setUserType(userRole);
       }
     };
 
@@ -125,7 +141,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAdmin, isAuthenticated, account, login, logout, web3 }}>
+    <AuthContext.Provider value={{ 
+      isAdmin, 
+      isAuthenticated, 
+      account, 
+      userType, 
+      login, 
+      logout, 
+      web3 
+    }}>
       {children}
     </AuthContext.Provider>
   );
