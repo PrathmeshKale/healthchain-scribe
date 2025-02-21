@@ -7,11 +7,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Web3Provider } from "./components/Web3Provider";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { DashboardLayout } from "./components/DashboardLayout";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import DoctorsPage from "./pages/doctors";
 import PatientsPage from "./pages/patients";
 import PatientDashboard from "./pages/patient-dashboard";
+import DoctorDashboard from "./pages/doctor-dashboard";
 import LoginPage from "./pages/login";
 import NotFound from "./pages/NotFound";
 
