@@ -2,6 +2,9 @@
 import { Search, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { useToast } from "@/components/ui/use-toast"
 
 interface NotFoundProps {
   title?: string
@@ -23,6 +26,25 @@ export function NotFound({
   title = "Page not found",
   description = "Lost, this page is. In another system, it may be.",
 }: NotFoundProps) {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+
+  const handleSearch = () => {
+    toast({
+      title: "Search",
+      description: `Searching for: ${searchQuery}`,
+    });
+  };
+
+  const handleGoBack = () => {
+    navigate(-1); // Goes back one step in history
+  };
+
+  const handleGoHome = () => {
+    navigate("/"); // Goes to home page
+  };
+
   return (
     <div className="relative text-center z-[1] pt-52">
       <h1 className="mt-4 text-balance text-5xl font-semibold tracking-tight text-primary sm:text-7xl">
@@ -34,24 +56,28 @@ export function NotFound({
       <div className="mt-10 flex flex-col sm:flex-row gap-y-3 sm:space-x-2 mx-auto sm:max-w-sm">
         <div className="relative w-full">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search" className="pl-8" />
+          <Input 
+            placeholder="Search" 
+            className="pl-8" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          />
         </div>
-        <Button variant="outline">Search</Button>
+        <Button variant="outline" onClick={handleSearch}>Search</Button>
       </div>
       <div className="mt-10 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-y-3 gap-x-6">
-        <Button variant="secondary" asChild className="group">
-          <a href="#">
-            <ArrowLeft
-              className="me-2 ms-0 opacity-60 transition-transform group-hover:-translate-x-0.5"
-              size={16}
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-            Go back
-          </a>
+        <Button variant="secondary" onClick={handleGoBack} className="group">
+          <ArrowLeft
+            className="me-2 ms-0 opacity-60 transition-transform group-hover:-translate-x-0.5"
+            size={16}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+          Go back
         </Button>
-        <Button className="-order-1 sm:order-none" asChild>
-          <a href="#">Take me home</a>
+        <Button className="-order-1 sm:order-none" onClick={handleGoHome}>
+          Take me home
         </Button>
       </div>
     </div>
