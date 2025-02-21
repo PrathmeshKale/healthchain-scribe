@@ -6,7 +6,7 @@ import { Mockup, MockupFrame } from "@/components/ui/mockup";
 import { Glow } from "@/components/ui/glow";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { FlickeringGrid } from "./flickering-grid";
+import { AnimatedGridPattern } from "./animated-grid-pattern";
 
 interface HeroAction {
   text: string;
@@ -47,13 +47,17 @@ export function HeroSection({
         "fade-bottom overflow-hidden pb-0"
       )}
     >
-      <FlickeringGrid
-        className="absolute inset-0 z-0"
-        squareSize={4}
-        gridGap={6}
-        color="#6B7280"
-        maxOpacity={0.3}
-        flickerChance={0.1}
+      <AnimatedGridPattern
+        className={cn(
+          "[mask-image:radial-gradient(900px_circle_at_center,white,transparent)]",
+          "inset-x-0 inset-y-[-30%] h-[160%]"
+        )}
+        width={40}
+        height={40}
+        numSquares={30}
+        maxOpacity={0.1}
+        duration={3}
+        repeatDelay={1}
       />
       <div className="relative mx-auto flex max-w-container flex-col gap-12 pt-16 sm:gap-24">
         <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
