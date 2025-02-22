@@ -16,6 +16,7 @@ import PatientDashboard from "./pages/patient-dashboard";
 import DoctorDashboard from "./pages/doctor-dashboard";
 import PatientRecords from "./pages/patient/records";
 import PatientAppointments from "./pages/patient/appointments";
+import PatientMessages from "./pages/patient/messages";
 import ProfileEdit from "./pages/patient/ProfileEdit";
 import LoginPage from "./pages/login";
 import NotFound from "./pages/NotFound";
@@ -77,6 +78,14 @@ const App = () => (
                   element={
                     <ProtectedRoute userType="patient">
                       <PatientAppointments />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/messages"
+                  element={
+                    <ProtectedRoute userType="patient">
+                      <PatientMessages />
                     </ProtectedRoute>
                   }
                 />
