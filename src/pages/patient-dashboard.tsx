@@ -6,26 +6,25 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWeb3 } from "@/components/Web3Provider";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { FileText, Calendar, UserCog, MessageSquare, Heart, Stethoscope, AlertCircle, PillIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, Calendar, UserCog, Clock, PlusCircle } from "lucide-react";
 
-interface PatientProfile {
-  medicalHistory: string[];
-  allergies: string[];
-  currentMedications: Array<{
-    name: string;
-    dosage: string;
-    frequency: string;
-  }>;
-  appointmentHistory: Array<{
-    date: string;
-    doctor: string;
-    reason: string;
-  }>;
-  assignedDoctors: Array<{
-    name: string;
-    specialization: string;
-    address: string;
-  }>;
+interface MedicalRecord {
+  id: string;
+  date: string;
+  doctorName: string;
+  diagnosis: string;
+  treatment: string;
+  notes: string;
+}
+
+interface Appointment {
+  id: string;
+  date: string;
+  time: string;
+  doctorName: string;
+  department: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
 }
 
 const PatientDashboard = () => {
@@ -33,124 +32,53 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const { contract } = useWeb3();
   const [loading, setLoading] = useState(true);
-  const [patientInfo, setPatientInfo] = useState<PatientProfile | null>(null);
+
+  // Mock data - in a real app, this would come from your contract
+  const [medicalRecords] = useState<MedicalRecord[]>([
+    {
+      id: '1',
+      date: '2024-02-15',
+      doctorName: 'Dr. Smith',
+      diagnosis: 'Type 2 Diabetes',
+      treatment: 'Prescribed Metformin 500mg',
+      notes: 'Regular exercise and diet control recommended'
+    },
+    {
+      id: '2',
+      date: '2024-01-20',
+      doctorName: 'Dr. Johnson',
+      diagnosis: 'Hypertension',
+      treatment: 'Prescribed Lisinopril 10mg',
+      notes: 'Monitor blood pressure daily'
+    }
+  ]);
+
+  const [appointments] = useState<Appointment[]>([
+    {
+      id: '1',
+      date: '2024-03-01',
+      time: '10:00 AM',
+      doctorName: 'Dr. Smith',
+      department: 'General Medicine',
+      status: 'scheduled'
+    },
+    {
+      id: '2',
+      date: '2024-02-15',
+      time: '2:30 PM',
+      doctorName: 'Dr. Johnson',
+      department: 'Endocrinology',
+      status: 'completed'
+    }
+  ]);
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-
-    // This is a mock profile - in a real app, you'd fetch this from your contract
-    const mockProfile: PatientProfile = {
-      medicalHistory: [
-        "Type 2 Diabetes diagnosed in 2020",
-        "Hypertension",
-        "Knee surgery in 2019"
-      ],
-      allergies: ["Penicillin", "Peanuts"],
-      currentMedications: [
-        {
-          name: "Metformin",
-          dosage: "500mg",
-          frequency: "Twice daily"
-        },
-        {
-          name: "Lisinopril",
-          dosage: "10mg",
-          frequency: "Once daily"
-        }
-      ],
-      appointmentHistory: [
-        {
-          date: "2024-02-15",
-          doctor: "Dr. Smith",
-          reason: "Regular checkup"
-        },
-        {
-          date: "2024-01-20",
-          doctor: "Dr. Johnson",
-          reason: "Diabetes follow-up"
-        }
-      ],
-      assignedDoctors: [
-        {
-          name: "Dr. Smith",
-          specialization: "General Practitioner",
-          address: "123 Medical Center"
-        },
-        {
-          name: "Dr. Johnson",
-          specialization: "Endocrinologist",
-          address: "456 Diabetes Clinic"
-        }
-      ]
-    };
-
-    setPatientInfo(mockProfile);
     setLoading(false);
   }, [isAuthenticated, navigate]);
-
-  const profileSections = [
-    {
-      title: "Medical History",
-      description: "Your past medical conditions and treatments",
-      icon: FileText,
-      content: patientInfo?.medicalHistory.map((item, index) => (
-        <div key={index} className="p-2 bg-muted/50 rounded-md mb-2">
-          {item}
-        </div>
-      ))
-    },
-    {
-      title: "Allergies",
-      description: "Known allergies and reactions",
-      icon: AlertCircle,
-      content: patientInfo?.allergies.map((allergy, index) => (
-        <div key={index} className="p-2 bg-muted/50 rounded-md mb-2">
-          {allergy}
-        </div>
-      ))
-    },
-    {
-      title: "Current Medications",
-      description: "Your prescribed medications",
-      icon: PillIcon,
-      content: patientInfo?.currentMedications.map((med, index) => (
-        <div key={index} className="p-2 bg-muted/50 rounded-md mb-2">
-          <p className="font-medium">{med.name}</p>
-          <p className="text-sm text-muted-foreground">
-            {med.dosage} - {med.frequency}
-          </p>
-        </div>
-      ))
-    },
-    {
-      title: "Appointment History",
-      description: "Your past medical appointments",
-      icon: Calendar,
-      content: patientInfo?.appointmentHistory.map((apt, index) => (
-        <div key={index} className="p-2 bg-muted/50 rounded-md mb-2">
-          <p className="font-medium">{apt.doctor}</p>
-          <p className="text-sm text-muted-foreground">
-            {new Date(apt.date).toLocaleDateString()} - {apt.reason}
-          </p>
-        </div>
-      ))
-    },
-    {
-      title: "My Doctors",
-      description: "Your healthcare providers",
-      icon: Stethoscope,
-      content: patientInfo?.assignedDoctors.map((doc, index) => (
-        <div key={index} className="p-2 bg-muted/50 rounded-md mb-2">
-          <p className="font-medium">{doc.name}</p>
-          <p className="text-sm text-muted-foreground">{doc.specialization}</p>
-          <p className="text-sm text-muted-foreground">{doc.address}</p>
-        </div>
-      ))
-    }
-  ];
 
   if (loading) {
     return <div>Loading...</div>;
@@ -160,29 +88,99 @@ const PatientDashboard = () => {
     <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Patient Profile</h1>
+          <h1 className="text-3xl font-bold">Patient Dashboard</h1>
           <Button variant="outline" onClick={() => navigate('/patient/settings')}>
             <UserCog className="mr-2 h-4 w-4" />
             Edit Profile
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {profileSections.map((section) => (
-            <Card key={section.title} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <section.icon className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-xl">{section.title}</CardTitle>
-                </div>
-                <CardDescription>{section.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {section.content}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Tabs defaultValue="records" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="records" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Medical Records
+            </TabsTrigger>
+            <TabsTrigger value="appointments" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Appointments
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="records" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">Medical Records</h2>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Request Records
+              </Button>
+            </div>
+            <div className="grid gap-4">
+              {medicalRecords.map((record) => (
+                <Card key={record.id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{record.diagnosis}</CardTitle>
+                        <CardDescription>
+                          {new Date(record.date).toLocaleDateString()} - {record.doctorName}
+                        </CardDescription>
+                      </div>
+                      <Button variant="outline" size="sm">View Details</Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p><strong>Treatment:</strong> {record.treatment}</p>
+                      <p><strong>Notes:</strong> {record.notes}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="appointments" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">Appointments</h2>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Book Appointment
+              </Button>
+            </div>
+            <div className="grid gap-4">
+              {appointments.map((appointment) => (
+                <Card key={appointment.id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{appointment.doctorName}</CardTitle>
+                        <CardDescription>{appointment.department}</CardDescription>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-sm ${
+                        appointment.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
+                        appointment.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span>{new Date(appointment.date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span>{appointment.time}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
