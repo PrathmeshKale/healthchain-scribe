@@ -5,8 +5,22 @@ import Navigation from "../components/Navigation";
 import { Typewriter } from "@/components/ui/typewriter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Stethoscope, Book } from "lucide-react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  // Safely use router hooks within a component that's definitely inside Router
+  const navigate = useNavigate();
+  
+  // Replace direct link with navigation function
+  const handleGetStarted = () => {
+    navigate('/dashboard');
+  };
+  
+  const handleViewGitHub = () => {
+    window.open("https://github.com/your-repo", "_blank");
+  };
+  
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -16,7 +30,8 @@ const Index = () => {
           text: "Revolutionizing Healthcare Records",
           action: {
             text: "Learn More",
-            href: "/about",
+            href: "#",
+            onClick: () => navigate('/about')
           },
         }}
         title={
@@ -42,12 +57,12 @@ const Index = () => {
         actions={[
           {
             text: "Get Started",
-            href: "/dashboard",
+            onClick: handleGetStarted,
             variant: "default",
           },
           {
             text: "View on GitHub",
-            href: "https://github.com/your-repo",
+            onClick: handleViewGitHub,
             variant: "outline",
             icon: <Icons.gitHub className="h-5 w-5" />,
           },

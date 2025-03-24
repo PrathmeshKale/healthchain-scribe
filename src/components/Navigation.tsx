@@ -1,20 +1,43 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { account, isAuthenticated, isAdmin, logout } = useAuth();
-  const navigate = useNavigate();
+  // Use a try-catch to handle the case when the component is rendered outside Router context
+  let navigate;
+  let account, isAuthenticated, isAdmin, logout;
+
+  try {
+    navigate = useNavigate();
+    const auth = useAuth();
+    account = auth.account;
+    isAuthenticated = auth.isAuthenticated;
+    isAdmin = auth.isAdmin;
+    logout = auth.logout;
+  } catch (error) {
+    // If we're outside a Router context, provide fallbacks
+    navigate = () => {};
+    account = null;
+    isAuthenticated = false;
+    isAdmin = false;
+    logout = () => {};
+  }
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const formatAddress = (address: string) => {
     if (!address) return "";
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
+
+  const handleNavigate = (path: string) => {
+    if (navigate) {
+      navigate(path);
+    }
   };
 
   return (
@@ -46,7 +69,7 @@ const Navigation = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate('/login')}
+              onClick={() => handleNavigate('/login')}
             >
               Connect Wallet
             </Button>
@@ -88,7 +111,7 @@ const Navigation = () => {
                 variant="outline"
                 className="w-full mt-4"
                 onClick={() => {
-                  navigate('/login');
+                  handleNavigate('/login');
                   toggleMenu();
                 }}
               >
@@ -110,20 +133,28 @@ const NavLinks = ({ mobile, onClick }: { mobile?: boolean; onClick?: () => void 
     { href: "/patients", label: "Patients" },
   ];
 
-  return (
-    <div className={`${mobile ? "flex flex-col space-y-4" : "flex space-x-8"}`}>
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          to={link.href}
-          className="text-gray-600 hover:text-primary transition-colors"
-          onClick={onClick}
-        >
-          {link.label}
-        </Link>
-      ))}
-    </div>
-  );
+  try {
+    // Check if we're in a Router context
+    useLocation();
+    
+    return (
+      <div className={`${mobile ? "flex flex-col space-y-4" : "flex space-x-8"}`}>
+        {links.map((link) => (
+          <Link
+            key={link.href}
+            to={link.href}
+            className="text-gray-600 hover:text-primary transition-colors"
+            onClick={onClick}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    );
+  } catch (error) {
+    // If we're outside a Router context, don't render links
+    return null;
+  }
 };
 
 export default Navigation;
