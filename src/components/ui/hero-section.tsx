@@ -10,7 +10,8 @@ import { AnimatedGridPattern } from "./animated-grid-pattern";
 
 interface HeroAction {
   text: string;
-  href: string;
+  href?: string;
+  onClick?: () => void;
   icon?: React.ReactNode;
   variant?: "default" | "outline";
 }
@@ -20,7 +21,8 @@ interface HeroProps {
     text: string;
     action: {
       text: string;
-      href: string;
+      href?: string;
+      onClick?: () => void;
     };
   };
   title: React.ReactNode;
@@ -65,10 +67,20 @@ export function HeroSection({
           {badge && (
             <Badge variant="outline" className="animate-appear gap-2 font-sans">
               <span className="text-muted-foreground">{badge.text}</span>
-              <Link to={badge.action.href} className="flex items-center gap-1">
-                {badge.action.text}
-                <ArrowRight className="h-3 w-3" />
-              </Link>
+              {badge.action.onClick ? (
+                <button 
+                  onClick={badge.action.onClick}
+                  className="flex items-center gap-1 hover:underline"
+                >
+                  {badge.action.text}
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              ) : (
+                <Link to={badge.action.href || "#"} className="flex items-center gap-1">
+                  {badge.action.text}
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
             </Badge>
           )}
 
@@ -85,11 +97,21 @@ export function HeroSection({
           {/* Actions */}
           <div className="relative z-10 flex animate-appear justify-center gap-4 opacity-0 delay-300">
             {actions.map((action, index) => (
-              <Button key={index} variant={action.variant} size="lg" asChild>
-                <Link to={action.href} className="flex items-center gap-2 font-sans">
-                  {action.icon}
-                  {action.text}
-                </Link>
+              <Button key={index} variant={action.variant} size="lg">
+                {action.onClick ? (
+                  <button 
+                    onClick={action.onClick}
+                    className="flex items-center gap-2 font-sans"
+                  >
+                    {action.icon}
+                    {action.text}
+                  </button>
+                ) : (
+                  <Link to={action.href || "#"} className="flex items-center gap-2 font-sans">
+                    {action.icon}
+                    {action.text}
+                  </Link>
+                )}
               </Button>
             ))}
           </div>

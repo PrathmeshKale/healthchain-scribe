@@ -1,4 +1,3 @@
-
 import { HeroSection } from "@/components/ui/hero-section";
 import { Icons } from "@/components/ui/icons";
 import Navigation from "../components/Navigation";
@@ -30,7 +29,6 @@ const Index = () => {
           text: "Revolutionizing Healthcare Records",
           action: {
             text: "Learn More",
-            href: "#",
             onClick: () => navigate('/about')
           },
         }}
