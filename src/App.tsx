@@ -20,6 +20,7 @@ import PatientMessages from "./pages/patient/messages";
 import ProfileEdit from "./pages/patient/ProfileEdit";
 import LoginPage from "./pages/login";
 import NotFound from "./pages/NotFound";
+import AppointmentsPage from "./pages/appointments";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requireAdmin>
                       <PatientsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/appointments"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AppointmentsPage />
                     </ProtectedRoute>
                   }
                 />
