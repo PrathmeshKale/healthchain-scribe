@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWeb3 } from "@/components/Web3Provider";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { FileText, Calendar, UserCog, MessageSquare, Heart, Stethoscope, AlertCircle, PillIcon } from "lucide-react";
+import { FileText, Calendar, UserCog, MessageSquare, Heart, Stethoscope, AlertCircle, PillIcon, UserRound } from "lucide-react";
 
 interface PatientProfile {
+  name: string;
+  age: number;
+  bloodGroup: string;
+  height: string;
+  weight: string;
+  publicAddress: string;
   medicalHistory: string[];
   allergies: string[];
   currentMedications: Array<{
@@ -43,6 +49,12 @@ const PatientDashboard = () => {
 
     // This is a mock profile - in a real app, you'd fetch this from your contract
     const mockProfile: PatientProfile = {
+      name: "John Doe",
+      age: 42,
+      bloodGroup: "O+",
+      height: "5'10\"",
+      weight: "180 lbs",
+      publicAddress: account || "0x0000...0000",
       medicalHistory: [
         "Type 2 Diabetes diagnosed in 2020",
         "Hypertension",
@@ -89,7 +101,12 @@ const PatientDashboard = () => {
 
     setPatientInfo(mockProfile);
     setLoading(false);
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, account]);
+
+  const formatAddress = (address: string) => {
+    if (!address) return "";
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
 
   const profileSections = [
     {
@@ -166,6 +183,46 @@ const PatientDashboard = () => {
             Edit Profile
           </Button>
         </div>
+
+        {/* Patient Information Card */}
+        <Card className="mb-8 hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <UserRound className="w-5 h-5 text-primary" />
+              <CardTitle className="text-xl">Personal Information</CardTitle>
+            </div>
+            <CardDescription>Your personal and contact details</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Full Name</p>
+                <p className="font-medium">{patientInfo?.name}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Age</p>
+                <p className="font-medium">{patientInfo?.age} years</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Blood Group</p>
+                <p className="font-medium">{patientInfo?.bloodGroup}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Height</p>
+                <p className="font-medium">{patientInfo?.height}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Weight</p>
+                <p className="font-medium">{patientInfo?.weight}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Wallet Address</p>
+                <p className="font-medium">{formatAddress(patientInfo?.publicAddress || "")}</p>
+                <p className="text-xs text-muted-foreground truncate">{patientInfo?.publicAddress}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {profileSections.map((section) => (
