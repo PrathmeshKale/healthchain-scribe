@@ -13,8 +13,6 @@ export const environment: Environment = {
 };
 
 export const IPFS: IPFSConfig = {
-  localIPFS: 'http://127.0.0.1:5001/api/v0',
-  localIPFSGet: 'http://localhost:8080/ipfs/'
+  localIPFS: import.meta.env.VITE_IPFS_URL || 'http://127.0.0.1:5001/api/v0',
+  localIPFSGet: import.meta.env.VITE_IPFS_GATEWAY || 'http://localhost:8080/ipfs/'
 };
-
-// Now we need to update our IPFS hook to use these configuration values
