@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { useWeb3 } from "@/components/Web3Provider";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Web3 from "web3";
@@ -11,21 +10,22 @@ import Contract from '../abis/Contract.json';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const LoginPage = () => {
-  const { login, isAuthenticated, isAdmin } = useAuth();
+  const { login, isAuthenticated, isAdmin, userType } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { web3 } = useWeb3();
 
   // Add useEffect to handle automatic redirection
   useEffect(() => {
     if (isAuthenticated) {
       if (isAdmin) {
         navigate('/dashboard');
+      } else if (userType === 'doctor') {
+        navigate('/doctor-dashboard');
       } else {
         navigate('/patient-dashboard');
       }
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [isAuthenticated, isAdmin, userType, navigate]);
 
   const handleLogin = async () => {
     try {

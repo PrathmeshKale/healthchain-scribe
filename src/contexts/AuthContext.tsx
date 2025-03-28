@@ -20,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // List of authorized admin addresses (in a real app, this would come from a secure backend)
 const ADMIN_ADDRESSES = [
+  '0xC5AcBCaDd3975c6Da6D0750c7bbe350E91019eCa', // Added specified admin address
   '0x123...', // Replace with actual admin addresses
 ].map(addr => addr.toLowerCase());
 
@@ -77,11 +78,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast({
         title: "Connected",
-        description: `Successfully authenticated as ${userRole}.`,
+        description: `Successfully authenticated as ${adminStatus ? 'admin' : userRole}.`,
       });
 
       // Redirect based on user type
-      if (userRole === 'doctor') {
+      if (adminStatus) {
+        navigate('/dashboard');
+      } else if (userRole === 'doctor') {
         navigate('/doctor-dashboard');
       } else {
         navigate('/patient-dashboard');
@@ -120,6 +123,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAdmin(adminStatus);
         const userRole = checkUserType(newAccount);
         setUserType(userRole);
+        
+        // Redirect based on new account type if already authenticated
+        if (isAuthenticated) {
+          if (adminStatus) {
+            navigate('/dashboard');
+          } else if (userRole === 'doctor') {
+            navigate('/doctor-dashboard');
+          } else {
+            navigate('/patient-dashboard');
+          }
+        }
       }
     };
 
@@ -138,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.ethereum.removeListener('chainChanged', handleChainChanged);
       }
     };
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   return (
     <AuthContext.Provider value={{ 
