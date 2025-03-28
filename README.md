@@ -68,7 +68,7 @@ The application uses smart contracts on Ethereum to manage roles and store docto
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/healthchain-scribe.git
+   git clone https://github.com/PrathmeshKale/healthchain-scribe
    cd healthchain-scribe
    ```
 
