@@ -4,13 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const LoginPage = () => {
   const { login, isAuthenticated, isAdmin, userType } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [selectedRole, setSelectedRole] = useState<"patient" | "admin">("patient");
 
   // Add useEffect to handle automatic redirection
   useEffect(() => {
@@ -27,7 +28,7 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      await login();
+      await login(selectedRole);
       // Navigation will be handled by useEffect
     } catch (error) {
       toast({
@@ -48,7 +49,11 @@ const LoginPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="patient" className="w-full">
+          <Tabs 
+            defaultValue="patient" 
+            className="w-full"
+            onValueChange={(value) => setSelectedRole(value as "patient" | "admin")}
+          >
             <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="patient">Patient</TabsTrigger>
               <TabsTrigger value="admin">Admin/Doctor</TabsTrigger>

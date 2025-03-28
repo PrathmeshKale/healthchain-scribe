@@ -11,7 +11,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   account: string | null;
   userType: UserType;
-  login: () => Promise<void>;
+  login: (role?: "patient" | "admin") => Promise<void>;
   logout: () => void;
   web3: Web3 | null;
 }
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return 'patient';
   };
 
-  const login = async () => {
+  const login = async (selectedRole?: "patient" | "admin") => {
     if (!window.ethereum) {
       toast({
         title: "MetaMask Required",
@@ -70,23 +70,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAccount(currentAccount);
       setIsAuthenticated(true);
       
+      // Check if account is an admin based on predefined addresses
       const adminStatus = checkAdminStatus(currentAccount);
       setIsAdmin(adminStatus);
 
-      const userRole = checkUserType(currentAccount);
-      setUserType(userRole);
-
-      toast({
-        title: "Connected",
-        description: `Successfully authenticated as ${adminStatus ? 'admin' : userRole}.`,
-      });
-
-      // Redirect based on user type
-      if (adminStatus) {
-        navigate('/dashboard');
-      } else if (userRole === 'doctor') {
-        navigate('/doctor-dashboard');
+      // If admin tab was selected, prioritize admin/doctor roles
+      if (selectedRole === "admin") {
+        if (adminStatus) {
+          setUserType(null); // Admin supersedes doctor/patient types
+          toast({
+            title: "Connected",
+            description: "Successfully authenticated as admin.",
+          });
+          navigate('/dashboard');
+          return;
+        } else {
+          // Not an admin but selected admin/doctor tab - check if doctor
+          const isDoctorAddress = DOCTOR_ADDRESSES.includes(currentAccount.toLowerCase());
+          if (isDoctorAddress) {
+            setUserType('doctor');
+            toast({
+              title: "Connected",
+              description: "Successfully authenticated as doctor.",
+            });
+            navigate('/doctor-dashboard');
+            return;
+          } else {
+            // Not admin or doctor, but trying to access admin/doctor area
+            toast({
+              title: "Access Denied",
+              description: "Your wallet is not registered as an admin or doctor.",
+              variant: "destructive",
+            });
+            setIsAuthenticated(false);
+            setAccount(null);
+            setWeb3(null);
+            return;
+          }
+        }
       } else {
+        // Patient tab selected - first check if admin (admins can access everything)
+        if (adminStatus) {
+          setUserType(null);
+          toast({
+            title: "Connected",
+            description: "Successfully authenticated as admin.",
+          });
+          navigate('/dashboard');
+          return;
+        }
+        
+        // Set as regular patient
+        setUserType('patient');
+        toast({
+          title: "Connected",
+          description: "Successfully authenticated as patient.",
+        });
         navigate('/patient-dashboard');
       }
     } catch (error) {
